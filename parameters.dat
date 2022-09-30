@@ -2,8 +2,8 @@
 8.0e0   # distance to the SN [kpc]
 32.5e0  # detector mass [kton]
 100     # parameter grid number
-1.4e0  # minimum search mass [Msun]
-1.85e0   # maximum search mass [Msun]
+1.3e0  # minimum search mass [Msun]
+1.8e0   # maximum search mass [Msun]
 10.0e0   # minimum search radius [km]
 14.0e0  # maximum search radius [km]
 0.75e53  # minimum search energy [erg]
