@@ -12,8 +12,8 @@ def event_generator():
   enum = 1000
   
   # load parameters
-  pnsparams = np.loadtxt('./sourceparams.dat')
-  obsparams = np.loadtxt('./parameters.dat')
+  pnsparams = np.loadtxt('/content/SPECIAL_BLEND/sourceparams.dat')
+  obsparams = np.loadtxt('/content/SPECIAL_BLEND/parameters.dat')
   
   Mpns  = pnsparams[0]
   Rpns  = pnsparams[1]
