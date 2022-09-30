@@ -1,0 +1,4 @@
+1.52e0   # PNS mass [Msun]
+11.8e0   # PNS radius [km]
+10.e52   # total neutrino emission energy [erg]
+1.6e0     # gbeta: surface correction and opacity boost parameters
