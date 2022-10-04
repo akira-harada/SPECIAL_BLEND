@@ -140,7 +140,7 @@ program SPECIAL_BLEND
   write(22,*)'# peak at (',peakEM(1),',',peakEM(2),')'
   do i=1,nparam
     do j=1,nparam
-      write(22,'(99E25.15e3)')et(i),mass(j),LH_RE(i,j)
+      write(22,'(99E25.15e3)')et(i),mass(j),LH_EM(i,j)
     enddo
     write(22,*)
   enddo
