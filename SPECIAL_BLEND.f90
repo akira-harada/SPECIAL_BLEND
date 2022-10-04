@@ -34,12 +34,12 @@ end subroutine eval_unbinned_likelihood
 
 !!!!! full-binned analysis !!!!!
 !!!!! binning time data !!!!!
-subroutine binning(tdata,edata,dt_min,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
+subroutine binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
   implicit none
   integer, parameter :: ebinnumber = 30
   real*8, parameter :: emax = 100.d0
   real*8, dimension(datsize), intent(in) :: tdata,edata
-  real*8, intent(in) :: dt_min,tmax
+  real*8, intent(in) :: dt_ini,tmin,tmax
   real*8, dimension(tbinnumber), intent(out) :: t_bin,dt
   real*8, dimension(ebinnumber), intent(out) :: e_bin,de
   real*8, dimension(tbinnumber,ebinnumber), intent(out) :: hist
@@ -51,8 +51,8 @@ subroutine binning(tdata,edata,dt_min,tmax,t_bin,dt,e_bin,de,hist,status,datsize
   itemax = 100
   ratio_min = 1.d0
   ratio_max = 2.d0
-  dt(1) = dt_min
-  t_bin(1) = dt(1)
+  dt(1) = dt_ini
+  t_bin(1) = tmin+dt(1)
   status = 0
 
   do ite = 1, itemax
@@ -134,10 +134,10 @@ end subroutine eval_binned_likelihood
 
 !!!!! time-binned analysis !!!!!
 !!!!! binning time data !!!!!
-subroutine time_binning(tdata,dt_min,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
+subroutine time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
   implicit none
   real*8, dimension(datsize), intent(in) :: tdata
-  real*8, intent(in) :: dt_min,tmax
+  real*8, intent(in) :: dt_ini,tmin,tmax
   real*8, dimension(tbinnumber), intent(out) :: t_bin,dt,thist
   integer, intent(out) :: status
   integer, intent(in) :: datsize,tbinnumber
@@ -147,8 +147,8 @@ subroutine time_binning(tdata,dt_min,tmax,t_bin,dt,thist,status,datsize,tbinnumb
   itemax = 100
   ratio_min = 1.d0
   ratio_max = 2.d0
-  dt(1) = dt_min
-  t_bin(1) = dt(1)
+  dt(1) = dt_ini
+  t_bin(1) = tmin+dt(1)
   status = 0
 
   do ite = 1, itemax

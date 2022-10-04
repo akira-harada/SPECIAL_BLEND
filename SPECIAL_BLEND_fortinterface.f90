@@ -1,13 +1,14 @@
 program SPECIAL_BLEND
   implicit none
-  real*8 :: params(14)
-  integer :: datsize,nparam
+  real*8 :: params(15)
+  integer :: datsize,linenum,nparam
   integer :: ana_mode ! 1: unbinned, 2: full-binned, 3: time-binned, 4: Gaussian approximation
   integer :: tbinnumber
   integer, parameter :: ebinnumber = 30
   real*8 :: gbeta,dist,Mdet
   real*8 :: mmin,mmax,rmin,rmax,emin,emax
-  real*8 :: dt_min,tmax
+  real*8 :: dt_ini,tmin,tmax
+  real*8 :: t_read,e_read
   real*8,allocatable :: tdata(:),edata(:)
   real*8,allocatable :: t_bin(:),dt(:)
   real*8,allocatable :: hist(:,:)
@@ -26,7 +27,7 @@ program SPECIAL_BLEND
   call cpu_time(time_i)
   
   open(11,file='parameters.dat',status='old')
-  do i = 1, 14
+  do i = 1, 15
     read(11,*)params(i)
   enddo
   close(11)
@@ -42,8 +43,9 @@ program SPECIAL_BLEND
   emax       = params(10)
   ana_mode   = int(params(11))
   tbinnumber = int(params(12))
-  dt_min     = params(13)
-  tmax       = params(14)
+  dt_ini     = params(13)
+  tmin       = params(14)
+  tmax       = params(15)
   
   allocate(mass(nparam),rad(nparam),et(nparam))
   allocate(mlogLH(nparam,nparam,nparam))
@@ -56,30 +58,42 @@ program SPECIAL_BLEND
   call grid(  et, nparam, emax, emin)
   
   i=0
+  j=0
   open(12,file='time_energy.dat',status='old')
   do while(1.eq.1)
-    read(12,*,end=100)
-    i = i+1
+    read(12,*,end=100)t_read,e_read
+    if(t_read .ge. tmin .and. t_read .le. tmax) i = i+1
+    j = j + 1
   enddo
 100 continue
     datsize = i
+    linenum = j
   close(12)
   
   allocate(tdata(datsize),edata(datsize))
   
   open(12,file='time_energy.dat',status='old')
-  do i = 1, datsize
-    read(12,*)tdata(i),edata(i)
+  i = 1
+  do j = 1, linenum
+    read(12,*)t_read,e_read
+    if(t_read .ge. tmin .and. t_read .le. tmax) then
+      tdata(i) = t_read
+      edata(i) = e_read
+      i = i + 1
+    endif
   enddo
   close(12)
   
   if(ana_mode .eq. 1) then
     write(*,*)'unbinned analysis mode'
+    write(*,*)'used event number',datsize,'/total event number',linenum
+    write(*,*)linenum - datsize,'events are outside [tmin,tmax] and neglected'
     call eval_unbinned_likelihood(tdata,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,datsize,nparam)
   elseif(ana_mode .eq. 2) then
     write(*,*)'full-binned analysis mode'
-    call binning(tdata,edata,dt_min,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(hist)),'/true total number',datsize
+    call binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
+    write(*,*)'total event number in histogram',int(sum(hist)),'/true total number',linenum
+    write(*,*)linenum - int(sum(hist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
       write(*,*)'binning error, try another bin number'
       stop
@@ -87,8 +101,9 @@ program SPECIAL_BLEND
     call eval_binned_likelihood(t_bin,dt,e_bin,de,hist,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   elseif(ana_mode .eq. 3) then
     write(*,*)'time-binned analysis mode'
-    call time_binning(tdata,dt_min,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',datsize
+    call time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
+    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',linenum
+    write(*,*)linenum - int(sum(thist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
       write(*,*)'binning error, try another bin number'
       stop
@@ -96,8 +111,9 @@ program SPECIAL_BLEND
     call eval_timebinned_likelihood(t_bin,dt,thist,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,datsize,nparam)
   elseif(ana_mode .eq. 4) then
     write(*,*)'Gaussian-likelihood analysis mode'
-    call time_binning(tdata,dt_min,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',datsize
+    call time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
+    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',linenum
+    write(*,*)linenum - int(sum(thist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
       write(*,*)'binning error, try another bin number'
       stop

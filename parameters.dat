@@ -8,7 +8,8 @@
 14.0e0  # maximum search radius [km]
 0.75e53  # minimum search energy [erg]
 1.25e53  # maximum search energy [erg]
-2      # analysis mode: 1-unbinned, 2-full-binned, 3-time-binned, 4-Gaussian-approx.
+4      # analysis mode: 1-unbinned, 2-full-binned, 3-time-binned, 4-Gaussian-approx.
 20       # time bin number
-0.5e0   # minimum time interval [s]
+0.5e0   # initial time interval [s]
+0.0e0   # minimum time for analysis [s] 
 1.0e2   # maximum time for analysis [s]
