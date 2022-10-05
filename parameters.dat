@@ -2,13 +2,13 @@
 8.0e0   # distance to the SN [kpc]
 32.5e0  # detector mass [kton]
 100     # parameter grid number
-1.3e0  # minimum search mass [Msun]
-1.8e0   # maximum search mass [Msun]
-10.0e0   # minimum search radius [km]
-14.0e0  # maximum search radius [km]
-0.75e53  # minimum search energy [erg]
-1.25e53  # maximum search energy [erg]
-4      # analysis mode: 1-unbinned, 2-full-binned, 3-time-binned, 4-Gaussian-approx.
+0.5e0  # minimum search mass [Msun]
+5.5e0   # maximum search mass [Msun]
+8.0e0   # minimum search radius [km]
+20.0e0  # maximum search radius [km]
+0.5e53  # minimum search energy [erg]
+3.5e53  # maximum search energy [erg]
+2      # analysis mode: 1-unbinned, 2-full-binned, 3-time-binned, 4-Gaussian-approx.
 20       # time bin number
 0.5e0   # initial time interval [s]
 0.0e0   # minimum time for analysis [s] 
