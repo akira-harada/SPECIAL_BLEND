@@ -294,7 +294,7 @@ subroutine mr_marginalize(mass,rad,et,mlogLH,LH_MR,CI95level,CI68level,peak,npar
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,ddparam
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
@@ -346,7 +346,8 @@ subroutine mr_marginalize(mass,rad,et,mlogLH,LH_MR,CI95level,CI68level,peak,npar
     endif
   enddo
   
-  LH_MR = LH_MR/LHnormal
+  ddparam = (mass(nparam)-mass(1))*(rad(nparam)-rad(1))/(nparam-1)**2
+  LH_MR = LH_MR/LHnormal/ddparam
 
 end subroutine mr_marginalize
 
@@ -361,7 +362,7 @@ subroutine re_marginalize(mass,rad,et,mlogLH,LH_RE,CI95level,CI68level,peak,npar
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,ddparam
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
@@ -413,7 +414,8 @@ subroutine re_marginalize(mass,rad,et,mlogLH,LH_RE,CI95level,CI68level,peak,npar
     endif
   enddo
   
- LH_RE = LH_RE/LHnormal
+  ddparam = (rad(nparam)-rad(1))*(et(nparam)-et(1))/(nparam-1)**2
+  LH_RE = LH_RE/LHnormal/ddparam
 
 end subroutine re_marginalize
 
@@ -429,7 +431,7 @@ subroutine em_marginalize(mass,rad,et,mlogLH,LH_EM,CI95level,CI68level,peak,npar
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,ddparam
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
@@ -481,7 +483,8 @@ subroutine em_marginalize(mass,rad,et,mlogLH,LH_EM,CI95level,CI68level,peak,npar
     endif
   enddo
   
- LH_EM = LH_EM/LHnormal
+  ddparam = (et(nparam)-et(1))*(mass(nparam)-mass(1))/(nparam-1)**2
+  LH_EM = LH_EM/LHnormal/ddparam
 
 end subroutine em_marginalize
 
@@ -497,7 +500,7 @@ subroutine m_marginalize(mass,rad,et,mlogLH,LH_M,CIandBF,nparam)
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,dparam
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
@@ -582,6 +585,9 @@ subroutine m_marginalize(mass,rad,et,mlogLH,LH_M,CIandBF,nparam)
   CIandBF(4) = upper68
   CIandBF(5) = upper95
   
+  dparam = (mass(nparam)-mass(1))/(nparam-1)
+  LH_M = LH_M/dparam
+  
 end subroutine m_marginalize
 
 subroutine r_marginalize(mass,rad,et,mlogLH,LH_R,CIandBF,nparam)
@@ -595,7 +601,7 @@ subroutine r_marginalize(mass,rad,et,mlogLH,LH_R,CIandBF,nparam)
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,dparam
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
@@ -679,6 +685,9 @@ subroutine r_marginalize(mass,rad,et,mlogLH,LH_R,CIandBF,nparam)
   CIandBF(3) = bestfit
   CIandBF(4) = upper68
   CIandBF(5) = upper95
+  
+  dparam = (rad(nparam)-rad(1))/(nparam-1)
+  LH_R = LH_R/dparam
 
 end subroutine r_marginalize
 
@@ -693,7 +702,7 @@ subroutine e_marginalize(mass,rad,et,mlogLH,LH_E,CIandBF,nparam)
   integer :: i_min, j_min, k_min, minimums(3)
   integer :: i,j,k,l
   real*8 :: deltamlogLH, sumLH
-  real*8 :: LHnormal,LHmax
+  real*8 :: LHnormal,LHmax,dparam
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
@@ -777,6 +786,9 @@ subroutine e_marginalize(mass,rad,et,mlogLH,LH_E,CIandBF,nparam)
   CIandBF(3) = bestfit
   CIandBF(4) = upper68
   CIandBF(5) = upper95
+  
+  dparam = (et(nparam)-et(1))/(nparam-1)
+  LH_E = LH_E/dparam
 
 end subroutine e_marginalize
 
