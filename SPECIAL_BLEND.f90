@@ -333,20 +333,20 @@ subroutine mr_marginalize(mass,rad,et,mlogLH,LH_MR,CI95level,CI68level,peak,npar
     enddo
   enddo
   search_channel = 1 ! 1:CI95level, 2:CI68level
+  ddparam = (mass(nparam)-mass(1))*(rad(nparam)-rad(1))/(nparam-1)**2
   do l=1,100
     if(levelintegral(l) .lt. 0.95d0 .and. search_channel .eq. 1) then
       CI95level = (dble(l)*(0.95d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.95d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       search_channel = search_channel + 1
     endif
     if(levelintegral(l) .lt. 0.68d0 .and. search_channel .eq. 2) then
       CI68level = (dble(l)*(0.68d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.68d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       exit
     endif
   enddo
   
-  ddparam = (mass(nparam)-mass(1))*(rad(nparam)-rad(1))/(nparam-1)**2
   LH_MR = LH_MR/LHnormal/ddparam
 
 end subroutine mr_marginalize
@@ -401,20 +401,20 @@ subroutine re_marginalize(mass,rad,et,mlogLH,LH_RE,CI95level,CI68level,peak,npar
     enddo
   enddo
   search_channel = 1 ! 1:CI95level, 2:CI68level
+  ddparam = (rad(nparam)-rad(1))*(et(nparam)-et(1))/(nparam-1)**2
   do l=1,100
     if(levelintegral(l) .lt. 0.95d0 .and. search_channel .eq. 1) then
       CI95level = (dble(l)*(0.95d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.95d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       search_channel = search_channel + 1
     endif
     if(levelintegral(l) .lt. 0.68d0 .and. search_channel .eq. 2) then
       CI68level = (dble(l)*(0.68d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.68d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       exit
     endif
   enddo
-  
-  ddparam = (rad(nparam)-rad(1))*(et(nparam)-et(1))/(nparam-1)**2
+
   LH_RE = LH_RE/LHnormal/ddparam
 
 end subroutine re_marginalize
@@ -470,20 +470,20 @@ subroutine em_marginalize(mass,rad,et,mlogLH,LH_EM,CI95level,CI68level,peak,npar
     enddo
   enddo
   search_channel = 1 ! 1:CI95level, 2:CI68level
+  ddparam = (et(nparam)-et(1))*(mass(nparam)-mass(1))/(nparam-1)**2
   do l=1,100
     if(levelintegral(l) .lt. 0.95d0 .and. search_channel .eq. 1) then
       CI95level = (dble(l)*(0.95d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.95d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       search_channel = search_channel + 1
     endif
     if(levelintegral(l) .lt. 0.68d0 .and. search_channel .eq. 2) then
       CI68level = (dble(l)*(0.68d0-levelintegral(l-1))+dble(l-1)*(levelintegral(l)-0.68d0))&
-                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal
+                & /(levelintegral(l)-levelintegral(l-1))*1.d-2*LHmax/LHnormal/ddparam
       exit
     endif
   enddo
   
-  ddparam = (et(nparam)-et(1))*(mass(nparam)-mass(1))/(nparam-1)**2
   LH_EM = LH_EM/LHnormal/ddparam
 
 end subroutine em_marginalize
