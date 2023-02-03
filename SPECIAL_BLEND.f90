@@ -1,5 +1,10 @@
+!!!!! The body of SPECIAL BLEND !!!!!
+!!!!! Bibliographic information will be presented here. !!!!!
+!!!!! Throughout the code, the Bayesian posterior !!!!!
+!!!!! probability distribution function is called "likelihood" !!!!!
+
 !!!!! unbinned analysis !!!!!
-!!!!! subroutine to give mlogLH = -log(likelihood) !!!!!
+!!!!! subroutine to give mlogLH = -log(likelihood) (equation 12) !!!!!
 subroutine eval_unbinned_likelihood(tdata,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,datsize,nparam)
   implicit none
   real*8, dimension(datsize), intent(in) :: tdata, edata
@@ -32,7 +37,7 @@ subroutine eval_unbinned_likelihood(tdata,edata,mass,rad,et,gbeta,dist,Mdet,mlog
 
 end subroutine eval_unbinned_likelihood
 
-!!!!! full-binned analysis !!!!!
+!!!!! binned analysis !!!!!
 !!!!! binning time data !!!!!
 subroutine binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
   implicit none
@@ -87,7 +92,7 @@ subroutine binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,da
   
 end subroutine binning
 
-!!!!! subroutine to give mlogLH = -log(likelihood) !!!!!
+!!!!! subroutine to give mlogLH = -log(likelihood) (equation 11) !!!!!
 subroutine eval_binned_likelihood(t_bin,dt,e_bin,de,hist,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   implicit none
   integer, parameter :: ebinnumber = 30
@@ -132,7 +137,7 @@ subroutine eval_binned_likelihood(t_bin,dt,e_bin,de,hist,mass,rad,et,gbeta,dist,
 
 end subroutine eval_binned_likelihood
 
-!!!!! time-binned analysis !!!!!
+!!!!! Gaussian-approximation analysis !!!!!
 !!!!! binning time data !!!!!
 subroutine time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
   implicit none
@@ -172,68 +177,24 @@ subroutine time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbi
 
 end subroutine time_binning
 
-!!!!! subroutine to give mlogLH = -log(likelihood) !!!!!
-subroutine eval_timebinned_likelihood(t_bin,dt,thist,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,datsize,nparam)
-  implicit none
-  real*8, dimension(tbinnumber), intent(in) :: t_bin,dt,thist
-  real*8, dimension(datsize), intent(in) :: edata
-  real*8, dimension(nparam), intent(in) :: mass,rad,et
-  real*8, intent(in) :: gbeta,dist,Mdet
-  real*8, dimension(nparam,nparam,nparam), intent(out) :: mlogLH
-  integer, intent(in) :: tbinnumber,datsize,nparam
-  integer :: i, j, k, l, m, p
-  integer :: int_thist,counted
-  real*8 :: anarate_coef, rate_guess, e_ave_guess, t0, temp_guess
-  real*8 :: log_n_in_bin_factorial
-  real*8, parameter :: FDint4=23.3d0,FDint5=118.d0
-
-  mlogLH = 0.d0
-
-  do i=1,nparam
-    do j=1,nparam
-      do k=1,nparam
-        t0            = 210.d0*(mass(i)/1.4d0)**1.2/(rad(j)/10.d0)**1.2*(gbeta/3.d0)**0.8d0/(et(k)/1.d52)**0.2d0
-        anarate_coef  = 720.d0*(Mdet/32.5d0)/(dist/10.d0)**2&
-                      & *(mass(i)/1.4d0)**7.5/(rad(j)/10.d0)**8*(gbeta/3.)**5
-        counted = 0
-        do l = 1, tbinnumber
-          rate_guess    = anarate_coef/((t_bin(l)+t0)/100.)**7.5
-          e_ave_guess   = 25.3d0*(mass(i)/1.4d0)**1.5/(rad(j)/10.d0)**2*(gbeta/3.d0)/((t_bin(l)+t0)/100.d0)**1.5
-          temp_guess    = e_ave_guess*FDint4/FDint5
-          log_n_in_bin_factorial = thist(l)*log(thist(l)) - thist(l) + 0.5d0*log(2.d0*3.141592d0*dble(thist(l)))   !log(thist(l)!) by Stirling's formula
-          mlogLH(i,j,k) = mlogLH(i,j,k) - thist(l)*log(rate_guess*dt(l)) + log_n_in_bin_factorial + rate_guess*dt(l)
-          int_thist = int(thist(l))
-          do m = 1, int_thist
-            p = counted + m
-            mlogLH(i,j,k) = mlogLH(i,j,k) - 4.d0*log(edata(p)) + log(1.d0+exp(edata(p)/temp_guess)) &
-                          &               + log(FDint4) + 5.d0*log(temp_guess)
-          enddo
-          counted = counted + int_thist
-        enddo
-      enddo
-    enddo
-  enddo
-
-end subroutine eval_timebinned_likelihood
-
-!!!!! Gaussian-approximation analysis !!!!!
-subroutine event_energy_averaging(thist,edata,e_ave,tbinnumber,datsize)
+subroutine event_energy_averaging(thist,edata,e_ave,status,datsize,tbinnumber)
   implicit none
   real*8, dimension(tbinnumber), intent(in) :: thist
   real*8, dimension(datsize), intent(in) :: edata
   real*8, dimension(tbinnumber), intent(out) :: e_ave
+  integer, intent(out) :: status
   integer, intent(in) :: tbinnumber,datsize
   integer :: l,m,p
   integer :: counted,int_thist
   
   counted = 0
   e_ave = 0.d0
+  status = 0
   do l = 1, tbinnumber
     int_thist = int(thist(l))
     if(int_thist .eq. 0) then
-      write(*,*)l,'-th time bin has no events'
-      write(*,*)'try another time bin number'
-      stop
+      status = l
+      return
     endif
     do m = 1, int_thist
       p = counted + m
@@ -246,7 +207,7 @@ subroutine event_energy_averaging(thist,edata,e_ave,tbinnumber,datsize)
   return
 end subroutine event_energy_averaging
 
-!!!!! subroutine to give mlogLH = -log(likelihood) !!!!!
+!!!!! subroutine to give mlogLH = -log(likelihood) (equation 2) !!!!!
 subroutine eval_Gaussian_likelihood(t_bin,dt,thist,e_ave,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   implicit none
   real*8, dimension(tbinnumber), intent(in) :: t_bin,dt,thist,e_ave

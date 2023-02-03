@@ -2,7 +2,7 @@ program SPECIAL_BLEND
   implicit none
   real*8 :: params(15)
   integer :: datsize,linenum,nparam
-  integer :: ana_mode ! 1: unbinned, 2: full-binned, 3: time-binned, 4: Gaussian approximation
+  integer :: ana_mode ! 1: unbinned, 2: full-binned, 3: Gaussian approximation
   integer :: tbinnumber
   integer, parameter :: ebinnumber = 30
   real*8 :: gbeta,dist,Mdet
@@ -90,7 +90,7 @@ program SPECIAL_BLEND
     write(*,*)linenum - datsize,'events are outside [tmin,tmax] and neglected'
     call eval_unbinned_likelihood(tdata,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,datsize,nparam)
   elseif(ana_mode .eq. 2) then
-    write(*,*)'full-binned analysis mode'
+    write(*,*)'binned analysis mode'
     call binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
     write(*,*)'total event number in histogram',int(sum(hist)),'/true total number',linenum
     write(*,*)linenum - int(sum(hist)),'events are outside [tmin,tmax] and neglected'
@@ -100,25 +100,20 @@ program SPECIAL_BLEND
     endif
     call eval_binned_likelihood(t_bin,dt,e_bin,de,hist,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   elseif(ana_mode .eq. 3) then
-    write(*,*)'time-binned analysis mode'
-    call time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',linenum
-    write(*,*)linenum - int(sum(thist)),'events are outside [tmin,tmax] and neglected'
-    if(status .ge. 1) then
-      write(*,*)'binning error, try another bin number'
-      stop
-    endif
-    call eval_timebinned_likelihood(t_bin,dt,thist,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,datsize,nparam)
-  elseif(ana_mode .eq. 4) then
     write(*,*)'Gaussian-likelihood analysis mode'
     call time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
     write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',linenum
     write(*,*)linenum - int(sum(thist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
-      write(*,*)'binning error, try another bin number'
+      write(*,*)'time binning error, try another bin number'
       stop
     endif
-    call event_energy_averaging(thist,edata,e_ave,tbinnumber,datsize)
+    call event_energy_averaging(thist,edata,e_ave,status,datsize,tbinnumber)
+    if(status .ge. 1) then
+      write(*,*)status,'-th time bin has no events'
+      write(*,*)'try another time bin number'
+      stop
+    endif
     call eval_Gaussian_likelihood(t_bin,dt,thist,e_ave,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   endif
   
@@ -130,7 +125,7 @@ program SPECIAL_BLEND
   call  e_marginalize(mass,rad,et,mlogLH,LH_E, CIandBFE, nparam)
 
   open(20,file='LH_MR.dat',status='replace')
-  write(20,*)'# CI95% level =',MR95,', CI68% level =',MR68
+  write(20,*)'# 95%CI level =',MR95,', 68%CI level =',MR68
   write(20,*)'# peak at (',peakMR(1),',',peakMR(2),')'
   do i=1,nparam
     do j=1,nparam
@@ -141,7 +136,7 @@ program SPECIAL_BLEND
   close(20)
   
   open(21,file='LH_RE.dat',status='replace')
-  write(21,*)'# CI95% level =',RE95,', CI68% level =',RE68
+  write(21,*)'# 95%CI level =',RE95,', 68%CI level =',RE68
   write(21,*)'# peak at (',peakRE(1),',',peakRE(2),')'
   do i=1,nparam
     do j=1,nparam
@@ -152,7 +147,7 @@ program SPECIAL_BLEND
   close(21)
   
   open(22,file='LH_EM.dat',status='replace')
-  write(22,*)'# CI95% level =',EM95,', CI68% level =',EM68
+  write(22,*)'# 95%CI level =',EM95,', 68%CI level =',EM68
   write(22,*)'# peak at (',peakEM(1),',',peakEM(2),')'
   do i=1,nparam
     do j=1,nparam
