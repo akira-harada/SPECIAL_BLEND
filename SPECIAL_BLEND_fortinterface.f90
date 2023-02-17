@@ -83,17 +83,15 @@ program SPECIAL_BLEND
     endif
   enddo
   close(12)
-  
+  write(*,*)'used event number',datsize,'/total event number',linenum
+  write(*,*)linenum - datsize,'events are outside [tmin,tmax] and neglected'
+
   if(ana_mode .eq. 1) then
     write(*,*)'unbinned analysis mode'
-    write(*,*)'used event number',datsize,'/total event number',linenum
-    write(*,*)linenum - datsize,'events are outside [tmin,tmax] and neglected'
     call eval_unbinned_likelihood(tdata,edata,mass,rad,et,gbeta,dist,Mdet,mlogLH,datsize,nparam)
   elseif(ana_mode .eq. 2) then
     write(*,*)'binned analysis mode'
     call binning(tdata,edata,dt_ini,tmin,tmax,t_bin,dt,e_bin,de,hist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(hist)),'/true total number',linenum
-    write(*,*)linenum - int(sum(hist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
       write(*,*)'binning error, try another bin number'
       stop
@@ -102,8 +100,6 @@ program SPECIAL_BLEND
   elseif(ana_mode .eq. 3) then
     write(*,*)'Gaussian-likelihood analysis mode'
     call time_binning(tdata,dt_ini,tmin,tmax,t_bin,dt,thist,status,datsize,tbinnumber)
-    write(*,*)'total event number in histogram',int(sum(thist)),'/true total number',linenum
-    write(*,*)linenum - int(sum(thist)),'events are outside [tmin,tmax] and neglected'
     if(status .ge. 1) then
       write(*,*)'time binning error, try another bin number'
       stop
@@ -116,6 +112,7 @@ program SPECIAL_BLEND
     endif
     call eval_Gaussian_likelihood(t_bin,dt,thist,e_ave,mass,rad,et,gbeta,dist,Mdet,mlogLH,tbinnumber,nparam)
   endif
+  write(*,*)'likelihood calculation completed'
   
   call mr_marginalize(mass,rad,et,mlogLH,LH_MR,MR95,MR68,peakMR,nparam)
   call re_marginalize(mass,rad,et,mlogLH,LH_RE,RE95,RE68,peakRE,nparam)
@@ -127,6 +124,7 @@ program SPECIAL_BLEND
   open(20,file='LH_MR.dat',status='replace')
   write(20,*)'# 95%CI level =',MR95,', 68%CI level =',MR68
   write(20,*)'# peak at (',peakMR(1),',',peakMR(2),')'
+  write(20,*)'# mass, radius, likelihood'
   do i=1,nparam
     do j=1,nparam
       write(20,'(99E25.15e3)')mass(i),rad(j),LH_MR(i,j)
@@ -138,6 +136,7 @@ program SPECIAL_BLEND
   open(21,file='LH_RE.dat',status='replace')
   write(21,*)'# 95%CI level =',RE95,', 68%CI level =',RE68
   write(21,*)'# peak at (',peakRE(1),',',peakRE(2),')'
+  write(20,*)'# radius, energy, likelihood'
   do i=1,nparam
     do j=1,nparam
       write(21,'(99E25.15e3)')rad(i),et(j),LH_RE(i,j)
@@ -149,6 +148,7 @@ program SPECIAL_BLEND
   open(22,file='LH_EM.dat',status='replace')
   write(22,*)'# 95%CI level =',EM95,', 68%CI level =',EM68
   write(22,*)'# peak at (',peakEM(1),',',peakEM(2),')'
+  write(20,*)'# energy, mass, likelihood'
   do i=1,nparam
     do j=1,nparam
       write(22,'(99E25.15e3)')et(i),mass(j),LH_EM(i,j)
@@ -165,6 +165,7 @@ program SPECIAL_BLEND
   upper95 = CIandBFM(5)
   write(30,*)'#mass best fit:',bestfit,'+',upper68-bestfit,'/-',bestfit-lower68,'(68%) +',&
             &                              upper95-bestfit,'/-',bestfit-lower95,'(95%)'
+  write(20,*)'# mass, likelihood'
   do i=1,nparam
     write(30,'(99E25.15e3)')mass(i),LH_M(i)
   enddo
@@ -178,6 +179,7 @@ program SPECIAL_BLEND
   upper95 = CIandBFR(5)
   write(31,*)'#radius best fit:',bestfit,'+',upper68-bestfit,'/-',bestfit-lower68,'(68%) +',&
             &                                upper95-bestfit,'/-',bestfit-lower95,'(95%)'
+  write(20,*)'# radius, likelihood'
   do i=1,nparam
     write(31,'(99E25.15e3)')rad(i),LH_R(i)
   enddo
@@ -191,6 +193,7 @@ program SPECIAL_BLEND
   upper95 = CIandBFE(5)
   write(32,*)'#energy best fit:',bestfit,'+',upper68-bestfit,'/-',bestfit-lower68,'(68%) +',&
             &                                upper95-bestfit,'/-',bestfit-lower95,'(95%)'
+  write(20,*)'# energy, likelihood'
   do i=1,nparam
     write(32,'(99E25.15e3)')et(i),LH_E(i)
   enddo
