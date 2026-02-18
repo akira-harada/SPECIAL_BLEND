@@ -215,10 +215,8 @@ subroutine eval_Gaussian_likelihood(t_bin,dt,thist,e_ave,mass,rad,et,gbeta,dist,
   real*8, intent(in) :: gbeta,dist,Mdet
   real*8, dimension(nparam,nparam,nparam), intent(out) :: mlogLH
   integer, intent(in) :: tbinnumber,nparam
-  integer :: i, j, k, l, m, p
-  integer :: int_thist,counted
-  real*8 :: anarate_coef, rate_guess, e_ave_guess, t0, temp_guess
-  real*8 :: log_n_in_bin_factorial
+  integer :: i, j, k, l
+  real*8 :: anarate_coef, rate_guess, e_ave_guess, t0
 
   mlogLH = 0.d0
 
@@ -259,11 +257,14 @@ subroutine mr_marginalize(mass,rad,et,mlogLH,LH_MR,CI95level,CI68level,peak,npar
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = et(1)
 
   do i=1,nparam
     do j=1,nparam
@@ -327,11 +328,14 @@ subroutine re_marginalize(mass,rad,et,mlogLH,LH_RE,CI95level,CI68level,peak,npar
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = mass(1)
 
   do j=1,nparam
     do k=1,nparam
@@ -396,11 +400,14 @@ subroutine em_marginalize(mass,rad,et,mlogLH,LH_EM,CI95level,CI68level,peak,npar
   real*8, dimension(100) :: levelintegral
   integer :: search_channel
   integer :: peakloc(2)
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = rad(1)
 
   do k=1,nparam
     do i=1,nparam
@@ -465,13 +472,17 @@ subroutine m_marginalize(mass,rad,et,mlogLH,LH_M,CIandBF,nparam)
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
-  real*8 :: CI95level,CI68level,maxpara,lower68,upper68,lower95,upper95,peak
+  real*8 :: CI95level,CI68level,lower68,upper68,lower95,upper95
   real*8 :: bestfit,x1,x2,x3,y1,y2,y3
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = rad(1)
+  nousedummy = et(1)
 
   do i=1,nparam
     deltamlogLH = 0.d0
@@ -566,13 +577,17 @@ subroutine r_marginalize(mass,rad,et,mlogLH,LH_R,CIandBF,nparam)
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
-  real*8 :: CI95level,CI68level,maxpara,lower68,upper68,lower95,upper95,peak
+  real*8 :: CI95level,CI68level,lower68,upper68,lower95,upper95
   real*8 :: bestfit,x1,x2,x3,y1,y2,y3
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = mass(1)
+  nousedummy = et(1)
 
   do j=1,nparam
     deltamlogLH = 0.d0
@@ -667,13 +682,17 @@ subroutine e_marginalize(mass,rad,et,mlogLH,LH_E,CIandBF,nparam)
   real*8, dimension(100) :: levelintegral
   integer :: paramax(1)
   integer :: search_channel !1: lower95, 2:lower68, 3:upper68, 4:upper95
-  real*8 :: CI95level,CI68level,maxpara,lower68,upper68,lower95,upper95,peak
+  real*8 :: CI95level,CI68level,lower68,upper68,lower95,upper95
   real*8 :: bestfit,x1,x2,x3,y1,y2,y3
+  real*8 :: nousedummy
 
   minimums = minloc(mlogLH)
   i_min = minimums(1)
   j_min = minimums(2)
   k_min = minimums(3)
+
+  nousedummy = mass(1)
+  nousedummy = rad(1)
 
   do k=1,nparam
     deltamlogLH = 0.d0
